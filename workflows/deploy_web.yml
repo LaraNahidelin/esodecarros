@@ -3,14 +3,14 @@ name: Build and Deploy Flutter Web
 on:
   push:
     branches:
-      - main   # o 'master', depende repo
+      - main   # si usas otra branch, cambia aquí
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Flutter repo
+      - name: Checkout Flutter repository
         uses: actions/checkout@v3
 
       - name: Install Flutter
@@ -18,29 +18,29 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Flutter pub get
+      - name: Install dependencies
         run: flutter pub get
 
-      - name: Build Flutter Web
+      - name: Build Web
         run: flutter build web --release
 
-      - name: Checkout deploy repo
+      - name: Checkout Deploy Repo
         uses: actions/checkout@v3
         with:
-          repository: TU-USUARIO/TU-REPO-DEPLOY
-          token: ${{ secrets.DEPLOY_TOKEN }}
+          repository: leonardo-tavera-anton/web-deploy-neumatik
+          token: ${{ secrets.DEPLOY_TOKEN }} # ESTE TOQUEN ESTA EN CLASSIC SERIA EL BUILD/WEB
           path: deploy
 
-      - name: Copy build to deploy repo
+      - name: Copy Build Web
         run: |
           rm -rf deploy/*
           cp -r build/web/* deploy/
 
-      - name: Commit and push to deploy repo
+      - name: Commit & Push to Deploy Repo
         working-directory: deploy
         run: |
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
           git add .
-          git commit -m "Auto deploy from Flutter repo"
+          git commit -m "Auto deploy - $(date)"
           git push
