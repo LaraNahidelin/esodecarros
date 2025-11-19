@@ -1,0 +1,46 @@
+name: Build and Deploy Flutter Web
+
+on:
+  push:
+    branches:
+      - main   # o 'master', depende repo
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Flutter repo
+        uses: actions/checkout@v3
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Build Flutter Web
+        run: flutter build web --release
+
+      - name: Checkout deploy repo
+        uses: actions/checkout@v3
+        with:
+          repository: TU-USUARIO/TU-REPO-DEPLOY
+          token: ${{ secrets.DEPLOY_TOKEN }}
+          path: deploy
+
+      - name: Copy build to deploy repo
+        run: |
+          rm -rf deploy/*
+          cp -r build/web/* deploy/
+
+      - name: Commit and push to deploy repo
+        working-directory: deploy
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add .
+          git commit -m "Auto deploy from Flutter repo"
+          git push
